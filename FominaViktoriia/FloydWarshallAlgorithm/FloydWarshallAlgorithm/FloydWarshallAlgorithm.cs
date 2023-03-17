@@ -6,15 +6,6 @@ internal static class FloydWarshallAlgorithm
 {
     internal static void RunOnNode(List<int>[] matrix, Communicator comm)
     {
-        if (comm.Size == 1)
-        {
-            // запускаем обычную реализацию
-        }
-
-        // Add checks
-        /*for (var i = 0; i < matrix.Length; ++i)
-        {       }*/
-
         // Количество столбцов в матрице
         int columnsNumber = matrix[0].Count;
 
@@ -30,7 +21,7 @@ internal static class FloydWarshallAlgorithm
 
         for (var k = 0; k < columnsNumber; k++)
         {
-            var line = new List<int>(columnsNumber);
+            List<int> line;
             var nodeLinesBorders = linesBorders[comm.Rank];
 
             if (k < nodeLinesBorders.Item1 || k > nodeLinesBorders.Item2)
@@ -80,6 +71,33 @@ internal static class FloydWarshallAlgorithm
                     }                    
                 }
             }
+        }
+    }
+
+    internal static void Run(List<int>[] matrix)
+    {
+        int rowsNumber = matrix.Length;
+        for (var k = 0; k < rowsNumber; k++)
+        {
+            for (var i = 0; i < rowsNumber; i++)
+            {
+                for (var j = 0; j < rowsNumber; j++)
+                {
+                    if (matrix[i][k] == -1 || matrix[k][j] == -1)
+                    {
+                        continue;
+                    }
+                    else if (matrix[i][j] == -1)
+                    {
+                        matrix[i][j] = matrix[i][k] + matrix[k][j];
+                    }
+                    else
+                    {
+                        matrix[i][j] = Math.Min(matrix[i][j], matrix[i][k] + matrix[k][j]);
+                    }
+                }
+            }
+
         }
     }
 }

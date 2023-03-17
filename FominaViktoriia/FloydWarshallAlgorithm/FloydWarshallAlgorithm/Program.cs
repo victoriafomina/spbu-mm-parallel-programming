@@ -5,9 +5,25 @@ using (var env = new MPI.Environment(ref args))
 {
     var comm = Communicator.world;
 
+    if (comm.Size == 1)
+    {
+        var matrix = UserInteractions.ReadMatrixFromFile();
+        FloydWarshallAlgorithm.FloydWarshallAlgorithm.Run(matrix);
+        UserInteractions.WriteMatrixToFile(matrix);
+        return;
+    }
+
     if (comm.Rank == 0)
     {
         var matrix = UserInteractions.ReadMatrixFromFile();
+
+        if (matrix.Length < comm.Size)
+        {
+            FloydWarshallAlgorithm.FloydWarshallAlgorithm.Run(matrix);
+            UserInteractions.WriteMatrixToFile(matrix);
+            return;
+        }
+
         var rowsNumber = matrix.GetLength(0);
 
         for (var i = 1; i < comm.Size; i++)
@@ -45,15 +61,6 @@ using (var env = new MPI.Environment(ref args))
                 ++currentMatrixRow;
             }
 
-        }
-
-        for (var i = 0; i < matrixOfShortestWays.Length; i++)
-        {
-            for (int j = 0; j < matrixOfShortestWays[i].Count; j++)
-            {
-                Console.Write($"{matrixOfShortestWays[i][j]} ");
-            }
-            Console.WriteLine();
         }
 
         UserInteractions.WriteMatrixToFile(matrixOfShortestWays);

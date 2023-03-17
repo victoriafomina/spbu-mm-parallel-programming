@@ -1,8 +1,8 @@
 ﻿namespace FloydWarshallAlgorithm;
 
-public static class MatrixUtil
+internal static class MatrixUtil
 {
-    public static List<int>[] GetSubmatrix(List<int>[] matrix, int firstRow, int lastRow)
+    internal static List<int>[] GetSubmatrix(List<int>[] matrix, int firstRow, int lastRow)
     {
         int newRowsNumber = lastRow - firstRow + 1;
         var submatrix = new List<int>[newRowsNumber];
@@ -36,8 +36,7 @@ public static class MatrixUtil
     }
 
     private static List<int>[] GetMatrixFromString(string str)
-    {
-        Console.WriteLine($"Содержимое файла:\n{str}\n");
+    {        
         var preMatrix = str.Split("\n");
 
         bool isIntFlag;
@@ -55,12 +54,12 @@ public static class MatrixUtil
             }
         }
 
-        var matrix = new List<int>[numberOfVertices];
-        for (var i = 0; i < numberOfVertices; i++)
+        var matrix = new List<int>[numberOfVertices + 1];
+        for (var i = 0; i < numberOfVertices + 1; i++)
         {
             matrix[i] = new List<int>();
 
-            for (var j = 0; j < numberOfVertices; ++j)
+            for (var j = 0; j < numberOfVertices + 1; ++j)
             {
                 if (i == j)
                 {
