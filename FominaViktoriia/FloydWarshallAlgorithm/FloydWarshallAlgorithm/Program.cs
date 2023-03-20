@@ -1,26 +1,39 @@
 ﻿using FloydWarshallAlgorithm;
 using MPI;
 
+if (args.Length < 2)
+{
+    throw new ArgumentException("Path to input file and path to output file should be passed through command line arguments");
+}
+
+var pathToInputFile = args[0];
+var pathToOutputFile = args[1];
+
+if (!File.Exists(pathToInputFile))
+{
+    throw new Exception($"Path to input file [{pathToInputFile}] does not exist");
+}
+
 using (var env = new MPI.Environment(ref args))
 {
     var comm = Communicator.world;
 
     if (comm.Size == 1)
     {
-        var matrix = UserInteractions.ReadMatrixFromFile();
+        var matrix = UserInteractions.ReadMatrixFromFile(pathToInputFile);
         FloydWarshallAlgorithm.FloydWarshallAlgorithm.Run(matrix);
-        UserInteractions.WriteMatrixToFile(matrix);
+        UserInteractions.WriteMatrixToFile(matrix, pathToOutputFile);
         return;
     }
 
     if (comm.Rank == 0)
     {
-        var matrix = UserInteractions.ReadMatrixFromFile();
+        var matrix = UserInteractions.ReadMatrixFromFile(pathToInputFile);
 
         if (matrix.Length < comm.Size)
         {
             FloydWarshallAlgorithm.FloydWarshallAlgorithm.Run(matrix);
-            UserInteractions.WriteMatrixToFile(matrix);
+            UserInteractions.WriteMatrixToFile(matrix, pathToOutputFile);
             return;
         }
 
@@ -45,7 +58,7 @@ using (var env = new MPI.Environment(ref args))
         FloydWarshallAlgorithm.FloydWarshallAlgorithm.RunOnNode(nodeSubmatrix, comm);
 
         var matrixOfShortestWays = new List<int>[matrix.Length];
-        for (int i = 0; i <= submatrixLastRow; ++i)
+        for (var i = 0; i <= submatrixLastRow; i++)
         {
             matrixOfShortestWays[i] = nodeSubmatrix[i];
         }
@@ -55,7 +68,7 @@ using (var env = new MPI.Environment(ref args))
         {
             var receivedMatrix = comm.Receive<List<int>[]>(i, 0);
 
-            for (var j = 0; j < receivedMatrix.Length; ++j)
+            for (var j = 0; j < receivedMatrix.Length; j++)
             {
                 matrixOfShortestWays[currentMatrixRow] = receivedMatrix[j];
                 ++currentMatrixRow;
@@ -63,7 +76,7 @@ using (var env = new MPI.Environment(ref args))
 
         }
 
-        UserInteractions.WriteMatrixToFile(matrixOfShortestWays);
+        UserInteractions.WriteMatrixToFile(matrixOfShortestWays, pathToOutputFile);
     }
     else
     {

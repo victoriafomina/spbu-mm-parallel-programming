@@ -90,12 +90,6 @@ internal static class MatrixUtil
                 throw new Exception($"Вершина [{toVertex} должна быть целым числом]");
             }
 
-            if (fromVertex >= toVertex)
-            {
-                throw new Exception($"Индекс первой вершины [{fromVertex}] должен быть строго меньше " +
-                        $" индекса второй вершины [{toVertex}]");
-            }
-
             isIntFlag = int.TryParse(triple[2], out int edgeWeight);
             if (!isIntFlag)
             {
